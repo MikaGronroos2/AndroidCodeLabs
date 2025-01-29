@@ -1,7 +1,9 @@
 package com.example.gridpractice.data
 
+import com.example.gridpractice.model.Topic
+import com.example.gridpractice.R
 object DataSource {
-    val topics = listOf(
+    val topics = listOf<Topic>(
         Topic(R.string.architecture, 58, R.drawable.architecture),
         Topic(R.string.crafts, 121, R.drawable.crafts),
         Topic(R.string.business, 78, R.drawable.business),
