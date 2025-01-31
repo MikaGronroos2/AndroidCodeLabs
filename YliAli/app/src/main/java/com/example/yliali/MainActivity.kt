@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
@@ -68,14 +69,19 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun YliAliPeliApp(){
+fun YliAliPeliApp(modifier: Modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)){
     val game by remember { mutableStateOf(YliAliPeli())}
     var answer by remember { mutableStateOf("") }
     var guessInput by remember { mutableStateOf("")}
-    Column(){
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ){
         Text(text = "YliAli Peli")
         Text(text = "Arvaa luku väliltä 0-10")
         //Text(text = "Nykyinen oikea vastaus: ${game.secret}")
+        Text("Arvauksesi: ${answer}")
         Text(text = "Nykyinen määrä arvauksia: ${game.guesses}")
         TextField(value = guessInput, onValueChange = { guessInput = it })
         Button( onClick = {
