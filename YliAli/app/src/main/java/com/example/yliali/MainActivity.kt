@@ -80,7 +80,6 @@ fun YliAliPeliApp(modifier: Modifier = Modifier.fillMaxSize().wrapContentSize(Al
     ){
         Text(text = "YliAli Peli")
         Text(text = "Arvaa luku väliltä 0-10")
-        //Text(text = "Nykyinen oikea vastaus: ${game.secret}")
         Text("Arvauksesi: ${answer}")
         Text(text = "Nykyinen määrä arvauksia: ${game.guesses}")
         TextField(value = guessInput, onValueChange = { guessInput = it })
