@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.navhosttraining.ui.theme.NavHostTrainingTheme
+import com.example.navhosttraining.ui.screens.NavHostTrainingApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,55 +50,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun NavHostTrainingApp(modifier: Modifier = Modifier) {
 
-    var textFieldValue by rememberSaveable { mutableStateOf("")}
-
-    Column(
-        modifier = Modifier
-            .padding(horizontal = 40.dp)
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-    ) {
-        Text(text = stringResource(R.string.title_info))
-        EditableTextField(
-            label = R.string.textfield_label,
-            value = textFieldValue,
-            onValueChange = { textFieldValue = it },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Number,
-            )
-        )
-        Button(
-            onClick = {}
-        ) {
-            Text(text=stringResource(R.string.button_title))
-        }
-
-
-    }
-
-
-}
-
-@Composable
-fun EditableTextField(
-    @StringRes label: Int,
-    value: String,
-    onValueChange: (String) -> Unit,
-    keyboardOptions: KeyboardOptions,
-    modifier: Modifier = Modifier
-
-) {
-    TextField(
-        value = value,
-        modifier = Modifier,
-        onValueChange = onValueChange,
-        label = { Text(stringResource(label)) },
-        singleLine = true
-        )
-}
 
 
 @Preview(showBackground = true)

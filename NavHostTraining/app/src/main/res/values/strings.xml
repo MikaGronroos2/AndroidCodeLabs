@@ -1,7 +1,17 @@
 <resources>
     <string name="app_name">NavHostTraining</string>
     <string name="title_info">Insert amount to pass onto next screen</string>
-    <string name="textfield_label">Add value here</string>
-    <string name= "button_title">This is a Button :D</string>
+    <string name="button_title">This is a Button :D</string>
+    <string name="welcome_text">Welcome to the App</string>
+    <string name="home">Home</string>
+    <string name="screen1">Screen 1</string>
+    <string name="screen2">Screen 2</string>
+    <string name="screen3">Screen 3</string>
+    <string name="screen4">Screen 4</string>
+    <string name="button_screen1">Move to the first screen</string>
+    <string name="button_screen2">Move to the second screen</string>
+    <string name="button_screen3">Move to the third screen</string>
+    <string name="button_screen4">Move to the fourth screen</string>
+
 
 </resources>
