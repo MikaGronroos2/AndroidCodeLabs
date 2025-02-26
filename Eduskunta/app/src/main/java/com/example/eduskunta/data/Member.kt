@@ -1,4 +1,4 @@
-package com.example.eduskunta
+package com.example.eduskunta.data
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
