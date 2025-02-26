@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EduskuntaTheme {
-                EduskuntaApp()
+                EduskuntaApp(modifier = Modifier.fillMaxSize())
             }
         }
     }
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     EduskuntaTheme {
-        EduskuntaApp()
+        EduskuntaApp(modifier = Modifier.fillMaxSize())
     }
 }
 
