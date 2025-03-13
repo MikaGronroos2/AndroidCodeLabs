@@ -1,3 +1,5 @@
+package com.example.eduskuntajsonattempt4
+
 import retrofit2.Retrofit
 import retrofit2.Converter
 import kotlinx.serialization.json.Json

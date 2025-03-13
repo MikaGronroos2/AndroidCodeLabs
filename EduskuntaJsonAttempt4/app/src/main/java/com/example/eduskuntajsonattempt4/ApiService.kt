@@ -1,3 +1,5 @@
+package com.example.eduskuntajsonattempt4
+
 import com.example.simplenotes2.Edustaja
 import retrofit2.Call
 import retrofit2.http.GET
