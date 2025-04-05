@@ -146,7 +146,7 @@ fun BTScannerExercise(
                 val name = result.device.name ?: "Tuntematon"
                 val address = result.device.address
                 val rssi = result.rssi
-                val color = if (result.isConnectable) Color.Black else Color.Gray
+                val color = if (result.isConnectable) Color.Blue else Color.White
 
                 Text(
                     text = "$name\n$address\nRSSI: $rssi dBm",
