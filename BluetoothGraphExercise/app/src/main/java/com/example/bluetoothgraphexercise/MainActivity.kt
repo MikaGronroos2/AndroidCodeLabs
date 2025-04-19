@@ -2,6 +2,7 @@ package com.example.bluetoothgraphexercise
 
 import java.util.UUID
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -24,9 +25,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -38,10 +43,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.bluetoothgraphexercise.ui.theme.BluetoothGraphExerciseTheme
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.m3.common.rememberM3VicoTheme
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.data.BleGattProperty
@@ -52,6 +69,8 @@ class MainActivity : ComponentActivity() {
 
     private val bleViewModel: BleViewModel by viewModels()
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestPermissions()
@@ -60,10 +79,6 @@ class MainActivity : ComponentActivity() {
             BluetoothGraphExerciseTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Navigation(modifier = Modifier.padding(innerPadding), bleViewModel)
-//                    BTConnect(
-//                        bleViewModel = bleViewModel,
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
                 }
             }
         }
@@ -93,20 +108,23 @@ enum class NavigationScreens(val title: String) {
 
 @Composable
 fun Navigation(modifier: Modifier, bleViewModel: BleViewModel) {
+
+    val sharedModifier = modifier.fillMaxSize().padding(16.dp)
+
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
         startDestination = NavigationScreens.BTCONNECT.title
     ) {
-        composable(NavigationScreens.BTCONNECT.title) { BTConnect(modifier, bleViewModel, navController) }
-        composable(NavigationScreens.BTGRAPH.title) { BTGraph(bleViewModel, modifier, navController) }
+        composable(NavigationScreens.BTCONNECT.title) { BTConnect(modifier = sharedModifier, bleViewModel, navController) }
+        composable(NavigationScreens.BTGRAPH.title) { BTGraph(bleViewModel, modifier = sharedModifier, navController) }
     }
 
 }
 
 
-
+@SuppressLint("MissingPermission")
 class BleViewModel : ViewModel() {
     companion object {
         val HEART_RATE_SERVICE_UUID = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")
@@ -114,6 +132,7 @@ class BleViewModel : ViewModel() {
     }
 
     // Connection
+    var savedDevice: ServerDevice? = null
     private var connection: ClientBleGatt? = null
     val scanResults = MutableLiveData<List<ServerDevice>>(emptyList())
     val isScanning = MutableLiveData(false)
@@ -229,11 +248,9 @@ fun BTConnect(modifier: Modifier, bleViewModel: BleViewModel, navController: Nav
                 Button(
                     onClick = {
 
-                        /*navController.navigate(NavigationScreens.BTGRAPH.title)*/
+                        bleViewModel.savedDevice = result
+                        navController.navigate(NavigationScreens.BTGRAPH.title)
 
-                        bleViewModel.viewModelScope.launch {
-                            bleViewModel.connectToDevice(context, result)
-                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -246,7 +263,75 @@ fun BTConnect(modifier: Modifier, bleViewModel: BleViewModel, navController: Nav
 
 @Composable
 fun BTGraph(bleViewModel: BleViewModel, modifier: Modifier, navController: NavController) {
-    Text("BTGraph")
+
+    val bpmValue by bleViewModel._bpmValue.observeAsState()
+    val context: Context = LocalContext.current
+
+    // List for Vico
+    val bpmValues = remember { mutableStateListOf<Float>() }
+    val modelProducer = remember { CartesianChartModelProducer() }
+
+    LaunchedEffect(Unit) {
+        if (bleViewModel.savedDevice != null) {
+            bleViewModel.connectToDevice(context, bleViewModel.savedDevice!!)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            lineSeries { series(bpmValues.map { it }) }
+        }
+    }
+
+    // Whenever bpmValue changes, add it to the list for vico
+    LaunchedEffect(bpmValue) {
+
+        bpmValue?.let {
+            bpmValues.add(it.toFloat())
+            // Limit the list to the last 50 values
+            if (bpmValues.size > 50) {
+                bpmValues.removeAt(0)
+            }
+
+            // Update the chart model only if bpmValues is not empty
+            if (bpmValues.isNotEmpty()) {
+                modelProducer.runTransaction {
+                    lineSeries { series(bpmValues.map { it }) }
+                }
+            }
+        }
+    }
+
+    Column(modifier = modifier) {
+        Text("BTGraph")
+        Text("BPM Value: $bpmValue")
+
+        if (bpmValues.isNotEmpty()) {
+            JetpackComposeBasicLineChart(
+                modelProducer = modelProducer,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            )
+        } else {
+            Text("No data available to display the chart.")
+        }
+    }
 }
 
-
+@Composable
+fun JetpackComposeBasicLineChart(
+    modelProducer: CartesianChartModelProducer,
+    modifier: Modifier = Modifier,
+) {
+    CartesianChartHost(
+        chart =
+            rememberCartesianChart(
+                rememberLineCartesianLayer(),
+                startAxis = VerticalAxis.rememberStart(),
+                bottomAxis = HorizontalAxis.rememberBottom(),
+            ),
+        modelProducer = modelProducer,
+        modifier = modifier,
+    )
+}
