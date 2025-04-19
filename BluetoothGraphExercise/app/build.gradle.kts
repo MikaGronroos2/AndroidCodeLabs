@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bluetoothdataexercise"
+    namespace = "com.example.bluetoothgraphexercise"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.bluetoothdataexercise"
+        applicationId = "com.example.bluetoothgraphexercise"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -32,7 +32,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1  1"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
@@ -41,11 +41,12 @@ android {
 
 dependencies {
 
-    // Bluetooth
+    // BT
     implementation (libs.scanner)
     implementation (libs.client)
     implementation (libs.advertiser)
     implementation (libs.server)
+
 
     // Livedata
     implementation(libs.androidx.runtime.livedata)
